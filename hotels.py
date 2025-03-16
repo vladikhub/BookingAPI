@@ -6,23 +6,34 @@ router = APIRouter(prefix="/hotels")
 
 hotels = [
     {"id": 1, "title": "Sochi", "name": "sochi"},
-    {"id": 2,"title": "Дубай", "name": "dubai"}
+    {"id": 2, "title": "Дубай", "name": "dubai"},
+    {"id": 3, "title": "Мальдивы", "name": "maldivi"},
+    {"id": 4, "title": "Геленджик", "name": "gelendzhik"},
+    {"id": 5, "title": "Москва", "name": "moscow"},
+    {"id": 6, "title": "Казань", "name": "kazan"},
+    {"id": 7, "title": "Санкт-Петербург", "name": "spb"}
 ]
 
 
 @router.get("", summary="Получить отели")
 def get_hotels(
-     id: int | None = Query(None, description="Айдишник"),
-     title: str | None = Query(None, description="Название отеля"),
+    id: int | None = Query(None, description="Айдишник"),
+    title: str | None = Query(None, description="Название отеля"),
+    page: int | None = Query(default=None, description="Страница"),
+    per_page: int | None = Query(default=None, description="Количество отелей на одной странице")
 ):
- hotels_ = []
- for hotel in hotels:
-     if id and hotel["id"] != id:
-         continue
-     if title and hotel["title"] != title:
-         continue
-     hotels_.append(hotel)
- return hotels_
+    hotels_ = []
+    for hotel in hotels:
+        if id and hotel["id"] != id:
+            continue
+        if title and hotel["title"] != title:
+            continue
+        hotels_.append(hotel)
+    if not page:
+        page = 1
+    if not per_page:
+        per_page = 3
+    return hotels_[per_page*(page - 1): per_page*page]
 
 
 @router.delete("/{hotel_id}", summary="Удалить отель по id")

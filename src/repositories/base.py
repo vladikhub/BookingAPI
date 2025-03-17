@@ -18,7 +18,7 @@ class BaseRepository:
         return result.scalars().one_or_none()
 
     async def add(self, data):
-        add_hotel_stmt = insert(self.model).values(**data.model_dump()).returning(self.model.id)
+        add_hotel_stmt = insert(self.model).values(**data.model_dump()).returning(self.model)
         #print(add_hotel_stmt.compile(compile_kwargs={"literal_binds": True}))
 
         return await self.session.execute(add_hotel_stmt)

@@ -80,12 +80,15 @@ async def update_hotel_all_fields(hotel_id: int, hotel_data: Hotel):
     "/{hotel_id}",
     summary="Частичное перезаписать данные отеля",
     description="Можно отправить name, а можно title")
-def update_hotel_field(hotel_id: int, hotel_data: HotelPATCH):
-    for hotel in hotels:
-        if hotel["id"] == hotel_id:
-            if hotel_data.title:
-                hotel["title"] = hotel_data.title
-            if hotel_data.name:
-                hotel["name"] = hotel_data.name
-            return {"Update": "success"}
-    return {"Error": "No such hotel"}
+async def update_hotel_field(hotel_id: int, hotel_data: HotelPATCH):
+    async with async_session_maker() as session:
+        await HotelsRepository(session).update(hotel_data, exclude_unset=True, id=hotel_id)
+        await session.commit()
+    return {"Update": "success"}
+
+
+@router.get("/{hotel_id}")
+async def get_hotel(hotel_id: int):
+    async with async_session_maker() as session:
+        hotel = await HotelsRepository(session).get_one_or_none(id=hotel_id)
+        return {"hotel": hotel}

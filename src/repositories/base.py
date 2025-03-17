@@ -25,7 +25,7 @@ class BaseRepository:
         res = await self.session.execute(add_data_stmt)
         return res.scalars().one()
 
-    async def update(self, data: BaseModel, **filter_by):
+    async def update(self, data: BaseModel, exclude_unset: bool = False, **filter_by):
         query = select(self.model).filter_by(**filter_by)
         res = await self.session.execute(query)
         objects = res.scalars().all()
@@ -33,7 +33,7 @@ class BaseRepository:
             raise HTTPException(status_code=404, detail="object is not found")
         if len(objects) > 1:
             raise HTTPException(status_code=400, detail="must be one object")
-        update_data_stmt = update(self.model).filter_by(**filter_by).values(**data.model_dump())
+        update_data_stmt = update(self.model).filter_by(**filter_by).values(**data.model_dump(exclude_unset=exclude_unset))
         # print(update_data_stmt.compile(compile_kwargs={"literal_binds": True}))
         await self.session.execute(update_data_stmt)
 

@@ -1,7 +1,10 @@
 from fastapi import Query, APIRouter, Body
+from sqlalchemy import insert, select
 
 from src.api.dependencies import PaginationDep
 from src.schemas.hotels import HotelPATCH, Hotel
+from src.database import async_session_maker
+from src.models.hotels import HotelsModel
 
 router = APIRouter(prefix="/hotels")
 
@@ -17,26 +20,27 @@ hotels = [
 
 
 @router.get("", summary="Получить отели")
-def get_hotels(
+async def get_hotels(
     pagination: PaginationDep,
-    id: int | None = Query(None, description="Айдишник"),
     title: str | None = Query(None, description="Название отеля"),
+    location: str | None = Query(None, description="Расположение отеля"),
 
 ):
-    hotels_ = []
-    for hotel in hotels:
-        if id and hotel["id"] != id:
-            continue
-        if title and hotel["title"] != title:
-            continue
-        hotels_.append(hotel)
-    page = pagination.page
-    per_page = pagination.per_page
-    if not page:
-        page = 1
-    if not per_page:
-        per_page = 3
-    return hotels_[per_page*(page - 1): per_page*page]
+    per_page = pagination.per_page or 3
+    async with async_session_maker() as session:
+        query = select(HotelsModel)
+        if location:
+            query = query.filter(HotelsModel.location.ilike(f"%{location}%"))
+        if title:
+            query = query.filter(HotelsModel.title.ilike(f"%{title}%"))
+        query = (
+            query.limit(per_page)
+            .offset(per_page * (pagination.page - 1))
+        )
+        result = await session.execute(query)
+        hotels = result.scalars().all()
+        return hotels
+
 
 
 @router.delete("/{hotel_id}", summary="Удалить отель по id")
@@ -47,22 +51,23 @@ def delete_hotel(hotel_id: int):
 
 
 @router.post("", summary="Добавить отель")
-def create_hotel(hotel_data: Hotel = Body(openapi_examples={
+async def create_hotel(hotel_data: Hotel = Body(openapi_examples={
     "1": {"summary": "Сочи", "value": {
-        "title": "Сочи отель у моря",
-        "name": "sochi_sea"
+        "title": "отель у моря",
+        "location": "Сочи, ул. Бористая д.5"
     }},
     "2": {"summary": "Дубай", "value": {
         "title": "Дубай 5 звезд",
-        "name": "dubai_5_star"
+        "location": "Дубай, ул. Гипостиф д.4"
     }}
 
 })):
-    hotels.append({
-        "id": len(hotels) + 1,
-        "title": hotel_data.title,
-        "name": hotel_data.name
-    })
+    async with async_session_maker() as session:
+        add_hotel_stmt = insert(HotelsModel).values(**hotel_data.model_dump())
+        print(add_hotel_stmt.compile(compile_kwargs={"literal_binds": True}))
+        await session.execute(add_hotel_stmt)
+        await session.commit()
+
     return {"Success": "True"}
 
 
@@ -81,7 +86,6 @@ def update_hotel_all_fields(hotel_id: int, hotel_data: Hotel):
     summary="Частичное перезаписать данные отеля",
     description="Можно отправить name, а можно title")
 def update_hotel_field(hotel_id: int, hotel_data: HotelPATCH):
-
     for hotel in hotels:
         if hotel["id"] == hotel_id:
             if hotel_data.title:

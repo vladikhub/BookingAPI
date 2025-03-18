@@ -3,21 +3,11 @@ from sqlalchemy import insert, select, func
 
 from src.api.dependencies import PaginationDep
 from src.repositories.hotels import HotelsRepository
-from src.schemas.hotels import HotelPATCH, Hotel
+from src.schemas.hotels import HotelPATCH, Hotel, HotelAdd
 from src.database import async_session_maker
 from src.models.hotels import HotelsModel
 
 router = APIRouter(prefix="/hotels")
-
-hotels = [
-    {"id": 1, "title": "Sochi", "name": "sochi"},
-    {"id": 2, "title": "Дубай", "name": "dubai"},
-    {"id": 3, "title": "Мальдивы", "name": "maldivi"},
-    {"id": 4, "title": "Геленджик", "name": "gelendzhik"},
-    {"id": 5, "title": "Москва", "name": "moscow"},
-    {"id": 6, "title": "Казань", "name": "kazan"},
-    {"id": 7, "title": "Санкт-Петербург", "name": "spb"}
-]
 
 
 @router.get("", summary="Получить отели")
@@ -38,8 +28,6 @@ async def get_hotels(
 
 
 
-
-
 @router.delete("/{hotel_id}", summary="Удалить отель по id")
 async def delete_hotel(hotel_id: int):
     async with async_session_maker() as session:
@@ -49,7 +37,7 @@ async def delete_hotel(hotel_id: int):
 
 
 @router.post("", summary="Добавить отель")
-async def create_hotel(hotel_data: Hotel = Body(openapi_examples={
+async def create_hotel(hotel_data: HotelAdd = Body(openapi_examples={
     "1": {"summary": "Сочи", "value": {
         "title": "отель у моря",
         "location": "Сочи, ул. Бористая д.5"
@@ -68,7 +56,7 @@ async def create_hotel(hotel_data: Hotel = Body(openapi_examples={
 
 
 @router.put("/{hotel_id}", summary="Полностью перезаписать данные отеля")
-async def update_hotel_all_fields(hotel_id: int, hotel_data: Hotel):
+async def update_hotel_all_fields(hotel_id: int, hotel_data: HotelAdd):
     async with async_session_maker() as session:
         await HotelsRepository(session).update(hotel_data, id=hotel_id)
         await session.commit()

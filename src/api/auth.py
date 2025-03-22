@@ -1,9 +1,9 @@
 from os import access
 
-from fastapi import Query, APIRouter, Body, HTTPException
+from fastapi import Query, APIRouter, Body, HTTPException, Depends
 from fastapi import Response, Request
 
-
+from src.api.dependencies import UserIdDep
 from src.repositories.users import UsersRepository
 from src.database import async_session_maker
 from src.schemas.users import UserRequestRegister, UserLogin, UserRegister
@@ -41,7 +41,17 @@ async def login_user(
         await session.commit()
     return {"access_token": access_token}
 
+# jwt.exceptions.ExpiredSignatureError: Signature has expired
 
-@router.get("/auth_only")
-async def auth_only(request: Request):
-    access_token = request.cookies.get("access_token")
+
+@router.get("/me")
+async def get_me(user_id: UserIdDep):
+    async with async_session_maker() as session:
+        user = await UsersRepository(session).get_one_or_none(id=user_id)
+        return user
+
+
+@router.get("/logout")
+async def logout(response: Response):
+    response.delete_cookie("access_token")
+    return {"status": "OK"}

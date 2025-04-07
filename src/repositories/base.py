@@ -11,7 +11,7 @@ class BaseRepository:
         self.session = session
 
     async def get_all(self, *args, **kwargs):
-        query = select(self.model).order_by(self.model.id)
+        query = select(self.model).filter_by(**kwargs).order_by(self.model.id)
         result = await self.session.execute(query)
         return [self.schema.model_validate(model, from_attributes=True) for model in result.scalars().all()]
 
@@ -23,10 +23,11 @@ class BaseRepository:
             return None
         return self.schema.model_validate(model, from_attributes=True)
 
-    async def add(self, data: BaseModel):
-        add_data_stmt = insert(self.model).values(**data.model_dump()).returning(self.model)
+    async def add(self, data: BaseModel, *filter_by):
+        add_data_stmt = insert(self.model).values(*filter_by, **data.model_dump()).returning(self.model)
         #print(add_hotel_stmt.compile(compile_kwargs={"literal_binds": True}))
         res = await self.session.execute(add_data_stmt)
+
         model = res.scalars().one()
         return self.schema.model_validate(model, from_attributes=True)
 

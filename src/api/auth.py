@@ -11,7 +11,7 @@ from src.services.auth import AuthService
 
 router = APIRouter(prefix="/auth", tags=["Авторизация и аутентификация"])
 
-@router.post("/register")
+@router.post("/register", summary="Регистрация пользователя")
 async def register_user(data: UserRequestRegister):
     hashed_password = AuthService().hash_password(data.password)
     new_user = UserRegister(
@@ -25,7 +25,7 @@ async def register_user(data: UserRequestRegister):
         await session.commit()
     return {"Success": "True"}
 
-@router.post("/login")
+@router.post("/login", summary="Аутентификация пользователя")
 async def login_user(
         data: UserLogin,
         response: Response
@@ -44,14 +44,14 @@ async def login_user(
 # jwt.exceptions.ExpiredSignatureError: Signature has expired
 
 
-@router.get("/me")
+@router.get("/me", summary="Получения текущего пользователя")
 async def get_me(user_id: UserIdDep):
     async with async_session_maker() as session:
         user = await UsersRepository(session).get_one_or_none(id=user_id)
         return user
 
 
-@router.get("/logout")
+@router.post("/logout", summary="Выход из профиля")
 async def logout(response: Response):
     response.delete_cookie("access_token")
     return {"status": "OK"}

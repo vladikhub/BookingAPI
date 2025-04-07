@@ -7,7 +7,7 @@ from src.schemas.hotels import HotelPATCH, Hotel, HotelAdd
 from src.database import async_session_maker
 from src.models.hotels import HotelsModel
 
-router = APIRouter(prefix="/hotels")
+router = APIRouter(prefix="/hotels", tags=["Отели"])
 
 
 @router.get("", summary="Получить отели")
@@ -75,7 +75,7 @@ async def update_hotel_field(hotel_id: int, hotel_data: HotelPATCH):
     return {"Update": "success"}
 
 
-@router.get("/{hotel_id}")
+@router.get("/{hotel_id}", summary="Получить отель по id")
 async def get_hotel(hotel_id: int):
     async with async_session_maker() as session:
         hotel = await HotelsRepository(session).get_one_or_none(id=hotel_id)

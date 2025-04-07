@@ -4,12 +4,11 @@ class HotelAdd(BaseModel):
     title: str
     location: str
 
-class Hotel(BaseModel):
+class Hotel(HotelAdd):
     id: int
-    title: str
-    location: str
 
 class HotelPATCH(BaseModel):
     title: str | None = Field(default=None)
     location: str | None = Field(default=None)
+
 

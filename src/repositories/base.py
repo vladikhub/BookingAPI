@@ -1,6 +1,7 @@
 from fastapi import HTTPException
 from pydantic import BaseModel
 from sqlalchemy import select, insert, update, delete
+from sqlalchemy.exc import IntegrityError
 
 
 class BaseRepository:
@@ -10,10 +11,13 @@ class BaseRepository:
     def __init__(self, session):
         self.session = session
 
-    async def get_all(self, *args, **kwargs):
-        query = select(self.model).filter_by(**kwargs).order_by(self.model.id)
+    async def get_filtered(self, **filter_by):
+        query = select(self.model).filter_by(**filter_by).order_by(self.model.id)
         result = await self.session.execute(query)
         return [self.schema.model_validate(model, from_attributes=True) for model in result.scalars().all()]
+
+    async def get_all(self, *args, **kwargs):
+        return await self.get_filtered()
 
     async def get_one_or_none(self, **filter_by):
         query = select(self.model).filter_by(**filter_by)
@@ -23,11 +27,13 @@ class BaseRepository:
             return None
         return self.schema.model_validate(model, from_attributes=True)
 
-    async def add(self, data: BaseModel, *filter_by):
-        add_data_stmt = insert(self.model).values(*filter_by, **data.model_dump()).returning(self.model)
-        #print(add_hotel_stmt.compile(compile_kwargs={"literal_binds": True}))
-        res = await self.session.execute(add_data_stmt)
-
+    async def add(self, data: BaseModel, *args):
+        try:
+            add_data_stmt = insert(self.model).values( **data.model_dump()).returning(self.model)
+            #print(add_hotel_stmt.compile(compile_kwargs={"literal_binds": True}))
+            res = await self.session.execute(add_data_stmt)
+        except IntegrityError:
+            raise HTTPException(status_code=404, detail="object is not found")
         model = res.scalars().one()
         return self.schema.model_validate(model, from_attributes=True)
 

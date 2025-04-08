@@ -55,7 +55,8 @@ async def get_me(
 ):
 
     user = await db.users.get_one_or_none(id=user_id)
-    return user
+    return {"data": user}
+
 
 
 @router.post("/logout", summary="Выход из профиля")

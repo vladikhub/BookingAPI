@@ -28,6 +28,30 @@
 - 🧱 Четкая архитектура проекта 
 
 ---
+## Документация ручек
+### Авторизация и аутентификация:
+  - POST /auth/register
+  - POST /auth/login
+  - GET /auth/me
+  - POST /auth/logout
+### Отели:
+  - GET /hotels
+  - POST /hotels
+  - GET /hotels/(hotel_id)
+  - DELETE /hotels/(hotel_id)
+  - PUT /hotels/(hotel_id)
+  - PATCH /hotels/(hotel_id)
+### Номера:
+  - GET /hotels/{hotel_id}/rooms
+  - POST /hotels/{hotel_id}/rooms
+  - GET /hotels/{hotel_id}/rooms/{room_id}
+  - DELETE /hotels/{hotel_id}/rooms/{room_id}
+  - PUT /hotels/{hotel_id}/rooms/{room_id}
+  - PATCH /hotels/{hotel_id}/rooms/{room_id}
+### Бронирования:
+  - GET /bookings
+  - POST /bookings
+  - GET /bookings/me
 
 ## ⚙️ Установка и запуск
 

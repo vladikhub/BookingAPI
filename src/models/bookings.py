@@ -1,5 +1,5 @@
-from datetime import date
-from sqlalchemy import ForeignKey, Integer
+from datetime import date, datetime
+from sqlalchemy import ForeignKey, Integer, DateTime, func
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -15,6 +15,7 @@ class BookingsModel(Base):
     date_from: Mapped[date]
     date_to: Mapped[date]
     price: Mapped[int]
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now())
 
     @hybrid_property
     def total_cost(self):

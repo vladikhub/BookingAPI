@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Body
+from datetime import date
+
+from fastapi import APIRouter, Body, Query
 
 from src.api.dependencies import DBDep
 from src.database import async_session_maker
@@ -11,14 +13,28 @@ router = APIRouter(prefix="/hotels", tags=["Номера"])
 @router.get("/{hotel_id}/rooms", summary="Получение всех номеров по id отеля")
 async def get_rooms(
         hotel_id: int,
+        db: DBDep,
+        date_from: date = Query(example="2025-03-01"),
+        date_to: date = Query(example="2025-03-10")
+):
+    rooms = await db.rooms.get_filtered_by_date(hotel_id=hotel_id, date_from=date_from, date_to=date_to)
+    return rooms
+
+
+@router.get("/{hotel_id}/rooms/{room_id}", summary="Получение конкретного номера конкретного отеля")
+async def get_room(
+        hotel_id: int,
+        room_id: int,
         db: DBDep
 ):
-    rooms = await db.rooms.get_filtered(hotel_id=hotel_id)
-    return rooms
+
+    room = await db.rooms.get_one_or_none(hotel_id=hotel_id, id=room_id)
+    return room
+
 
 @router.post("/{hotel_id}/rooms", summary="Добавление нового номера отелю с id")
 async def add_room(
-        db, DBDep,
+        db: DBDep,
         hotel_id: int,
         data: RoomAddRequest = Body(openapi_examples={
     "1": {"summary": "На одного", "value": {
@@ -52,15 +68,7 @@ async def delete_room(
     return {"status": "OK"}
 
 
-@router.get("/{hotel_id}/rooms/{room_id}", summary="Получение конкретного номера конкретного отеля")
-async def get_room(
-        hotel_id: int,
-        room_id: int,
-        db: DBDep
-):
 
-    room = await db.rooms.get_one_or_none(hotel_id=hotel_id, id=room_id)
-    return room
 
 @router.put("/{hotel_id}/rooms/{room_id}", summary="Полностью перезаписать данные комнаты")
 async def update_room_all_fields(

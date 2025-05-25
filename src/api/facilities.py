@@ -15,4 +15,4 @@ async def get_facilities(db: DBDep):
 async def create_facility(db: DBDep, facility_data: FacilityAdd = Body()):
     facility = await db.facilities.add(facility_data)
     await db.commit()
-    return facility
+    return {"status": "OK", "data": facility}

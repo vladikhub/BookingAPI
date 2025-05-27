@@ -28,7 +28,6 @@ async def get_room(
         room_id: int,
         db: DBDep
 ):
-
     room = await db.rooms.get_one_or_none(hotel_id=hotel_id, id=room_id)
     return room
 
@@ -96,23 +95,12 @@ async def update_room_all_fields(
         }},
 })):
     _room_data = RoomAdd(hotel_id=hotel_id, **data.model_dump())
-    new_fac_ids = data.facilities_ids
-    facilities = await db.rooms_facilities.get_filtered(room_id=room_id)
-    old_facilities_ids = [item.facility_id for item in facilities]
-    for_del_ids = []
-    for_add_ids = []
-    for i in new_fac_ids:
-        if i not in old_facilities_ids:
-            for_add_ids.append(i)
-    for i in old_facilities_ids:
-        if i not in new_fac_ids:
-            for_del_ids.append(i)
+
     await db.rooms.update(_room_data, id=room_id)
-    await db.rooms_facilities.delete(room_id, for_del_ids)
-    if for_add_ids:
-        rooms_facilities_for_add = [RoomFacilityAdd(room_id=room_id, facility_id=f_id) for f_id in for_add_ids]
-        await db.rooms_facilities.add_bulk(rooms_facilities_for_add)
+    await db.rooms_facilities.set_room_facilities(room_id, data.facilities_ids)
+
     await db.commit()
+
     return {"status": "OK"}
 
 @router.patch("/{hotel_id}/rooms/{room_id}", summary="Частично перезаписать данные комнаты")
@@ -121,26 +109,11 @@ async def update_room_field(
         hotel_id: int,
         room_id: int,
         data: RoomPatchRequest = Body()):
-    _room_data = RoomPatch(hotel_id=hotel_id, **data.model_dump(exclude_unset=True))
+    data_dict = data.model_dump(exclude_unset=True)
+    _room_data = RoomPatch(hotel_id=hotel_id, **data_dict)
     await db.rooms.update(_room_data, exclude_unset=True, id=room_id)
-    if data.facilities_ids:
 
-        new_fac_ids = data.facilities_ids
-        facilities = await db.rooms_facilities.get_filtered(room_id=room_id)
-
-        old_facilities_ids = [item.facility_id for item in facilities]
-        for_del_ids = []
-        for_add_ids = []
-        for i in new_fac_ids:
-            if i not in old_facilities_ids:
-                for_add_ids.append(i)
-        for i in old_facilities_ids:
-            if i not in new_fac_ids:
-                for_del_ids.append(i)
-        await db.rooms_facilities.delete(room_id, for_del_ids)
-        if for_add_ids:
-            rooms_facilities_for_add = [RoomFacilityAdd(room_id=room_id, facility_id=f_id) for f_id in for_add_ids]
-            await db.rooms_facilities.add_bulk(rooms_facilities_for_add)
-
+    if 'facilities_ids' in data_dict:
+        await db.rooms_facilities.set_room_facilities(room_id, data.facilities_ids)
     await db.commit()
     return {"status": "OK"}

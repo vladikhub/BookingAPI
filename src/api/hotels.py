@@ -14,14 +14,14 @@ router = APIRouter(prefix="/hotels", tags=["Отели"])
 
 
 @router.get("", summary="Получить отели")
-@cache(expire=10)
+
 async def get_hotels(
     pagination: PaginationDep,
     db: DBDep,
     title: str | None = Query(None, description="Название отеля"),
     location: str | None = Query(None, description="Расположение отеля"),
-    date_from: date = Query(examples=["2025-03-01"]),
-    date_to: date = Query(examples=["2025-03-10"])
+    date_from: date = Query(example="2025-03-01"),
+    date_to: date = Query(example="2025-03-10")
 
 ):
     print("Идем в бд")

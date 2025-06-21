@@ -14,8 +14,6 @@ async def test_booking_crud(db):
         price= 200
     )
     new_booking = await db.bookings.add(booking_data)
-    assert new_booking
-    print(f"{new_booking=}")
 
     booking_id = new_booking.id
     # Тест read
@@ -23,6 +21,8 @@ async def test_booking_crud(db):
         id=new_booking.id
     )
     assert booking
+    assert new_booking.room_id == booking.room_id
+    assert new_booking.price == booking.price
 
     # Тест update
     booking_update = BookingAdd(
@@ -48,4 +48,3 @@ async def test_booking_crud(db):
     deleted_booking = await db.bookings.get_one_or_none(id=booking_id)
     assert deleted_booking is None
 
-    await db.commit()

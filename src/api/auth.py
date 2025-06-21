@@ -16,6 +16,7 @@ async def register_user(
         data: UserRequestRegister,
         db: DBDep
 ):
+
     hashed_password = AuthService().hash_password(data.password)
     new_user = UserRegister(
         email=data.email,

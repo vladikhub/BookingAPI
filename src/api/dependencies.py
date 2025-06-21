@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import Query, Depends, Request, HTTPException
 from pydantic import BaseModel
 
-from src.database import async_session_maker
+from src.database import async_session_maker, async_session_maker_null_pool
 from src.services.auth import AuthService
 from src.utils.db_manager import BDManager
 
@@ -32,4 +32,6 @@ async def get_db():
     async with BDManager(session_factory=async_session_maker) as db:
         yield db
 
+
 DBDep = Annotated[BDManager, Depends(get_db)]
+

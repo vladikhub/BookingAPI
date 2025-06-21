@@ -3,10 +3,12 @@ from pydantic import BaseModel
 from sqlalchemy import select, insert, update, delete
 from sqlalchemy.exc import IntegrityError
 
+from src.repositories.mappers.base import DataMapper
+
 
 class BaseRepository:
     model = None
-    schema: BaseModel = None
+    mapper: DataMapper = None
 
     def __init__(self, session):
         self.session = session
@@ -17,7 +19,7 @@ class BaseRepository:
                 .filter_by(**filter_by)
                 .order_by(self.model.id))
         result = await self.session.execute(query)
-        return [self.schema.model_validate(model, from_attributes=True) for model in result.scalars().all()]
+        return [self.mapper.map_to_domain_entity(model) for model in result.scalars().all()]
 
     async def get_all(self, *args, **kwargs):
         return await self.get_filtered()
@@ -28,7 +30,7 @@ class BaseRepository:
         model = result.scalars().one_or_none()
         if model is None:
             return None
-        return self.schema.model_validate(model, from_attributes=True)
+        return self.mapper.map_to_domain_entity(model)
 
     async def add(self, data: BaseModel, *args):
         try:
@@ -38,7 +40,7 @@ class BaseRepository:
         except IntegrityError:
             raise HTTPException(status_code=404, detail="object is not found")
         model = res.scalars().one()
-        return self.schema.model_validate(model, from_attributes=True)
+        return self.mapper.map_to_domain_entity(model)
 
     async def add_bulk(self, data: list[BaseModel], *args):
         add_data_stmt = insert(self.model).values([item.model_dump() for item in data])

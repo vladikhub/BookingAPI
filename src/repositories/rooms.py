@@ -9,13 +9,14 @@ from src.models.bookings import BookingsModel
 from src.models.rooms import RoomsModel
 from src.models.hotels import HotelsModel
 from src.repositories.base import BaseRepository
+from src.repositories.mappers.mappers import RoomDataMapper
 from src.repositories.utils import rooms_ids_for_booking
 from src.schemas.rooms import Room, RoomAdd, RoomWithRel
 
 
 class RoomsRepository(BaseRepository):
     model = RoomsModel
-    schema = Room
+    mapper = RoomDataMapper
 
     async def get_filtered_by_date(
             self,
@@ -34,7 +35,7 @@ class RoomsRepository(BaseRepository):
         return [RoomWithRel.model_validate(model, from_attributes=True) for model in result.scalars().all()]
         # print(query.compile(bind=engine, compile_kwargs={"literal_binds": True}))
 
-    async def get_one_or_none(self, **filter_by):
+    async def get_one_or_none_with_rels(self, **filter_by):
         query = (
             select(self.model)
             .options(selectinload(self.model.facilities))

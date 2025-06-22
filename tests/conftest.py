@@ -1,6 +1,10 @@
 import json
 import logging
 
+from unittest import mock
+
+mock.patch("fastapi_cache.decorator.cache", lambda *args, **kwargs : lambda f: f).start()
+
 import pytest
 from httpx import AsyncClient, ASGITransport
 
@@ -49,10 +53,14 @@ async def load_data(setup_database):
         await db_.rooms.add_bulk([RoomAdd(**el) for el in rooms])
         await db_.commit()
 
-@pytest.fixture(scope="session")
-async def ac():
+async def get_ac():
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         yield ac
+
+@pytest.fixture(scope="session")
+async def ac():
+    async for ac_ in get_ac():
+        yield ac_
 
 @pytest.fixture(scope="session", autouse=True)
 async def register_user(load_data, ac):
@@ -65,3 +73,17 @@ async def register_user(load_data, ac):
             "password": "1234"
         }
     )
+
+@pytest.fixture(scope="session", autouse=True)
+async def authed_ac(register_user):
+    async for ac in get_ac():
+        response = await ac.post(
+            "/auth/login",
+            json={
+                "email": "smavl.andrey@gmail.com",
+                "password": "1234"
+            }
+        )
+        token = response.json().get("access_token")
+        assert token
+        yield ac

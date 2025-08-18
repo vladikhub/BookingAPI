@@ -1,6 +1,9 @@
-from fastapi import APIRouter
+
+
+from fastapi import APIRouter, HTTPException
 
 from src.api.dependencies import DBDep, UserIdDep
+from src.exceptions import NoLeftRoomException
 from src.schemas.bookings import BookingRequest, BookingAdd
 
 router = APIRouter(prefix="/bookings", tags=["Бронирования"])
@@ -24,10 +27,16 @@ async def create_booking(
         db: DBDep,
         user_id: UserIdDep
 ):
-    price = (await db.rooms.get_one_or_none(id=data.room_id)).price
-    _booking_data = BookingAdd(**data.model_dump(), user_id=user_id, price=price)
+    try:
+        room = await db.rooms.get_one_or_none(id=data.room_id)
+        if room is None:
+            raise HTTPException(status_code=404, detail="object is not exist")
+        price = room.price
+        _booking_data = BookingAdd(**data.model_dump(), user_id=user_id, price=price)
 
-    booking = await db.bookings.add(_booking_data, price)
-    await db.commit()
-    return booking
+        booking = await db.bookings.add_booking(**_booking_data.model_dump())
+        await db.commit()
+        return {"status": "OK", "data": booking}
+    except NoLeftRoomException as er:
+        raise HTTPException(status_code=400, detail="no free rooms")
 

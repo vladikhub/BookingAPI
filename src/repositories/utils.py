@@ -32,7 +32,8 @@ def rooms_ids_for_booking(
         .outerjoin(booked_rooms, RoomsModel.id == booked_rooms.c.room_id)
         .cte(name="left_rooms")
     )
-
+    print("---------", left_rooms.compile(compile_kwargs={"literal_binds": True}), "--------")
+    print(f"{left_rooms=}")
     rooms_ids_for_hotel = (
         select(RoomsModel.id)
     )

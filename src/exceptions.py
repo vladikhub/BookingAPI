@@ -1,0 +1,2 @@
+class NoLeftRoomException(Exception):
+    pass

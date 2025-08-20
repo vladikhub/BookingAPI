@@ -2,6 +2,7 @@ import pytest
 
 from src.database import async_session_maker_null_pool
 from src.utils.db_manager import BDManager
+from tests.conftest import get_db_null_pool
 
 
 @pytest.mark.parametrize("room_id, date_from, date_to, status_code", [
@@ -38,10 +39,10 @@ async def test_add_booking(
 
 @pytest.fixture(scope="module")
 async def delete_all_bookings():
-    async with BDManager(session_factory=async_session_maker_null_pool) as db_:
+    async for db_ in get_db_null_pool():
         await db_.bookings.delete()
         await db_.commit()
-        yield
+
 
 @pytest.mark.parametrize("room_id, date_from, date_to, booked_count", [
     (1, "2025-06-07", "2025-06-15", 1),

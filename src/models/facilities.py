@@ -8,6 +8,7 @@ from src.database import Base
 if typing.TYPE_CHECKING:
     from src.models import RoomsModel
 
+
 class FacilitiesModel(Base):
     __tablename__ = "facilities"
 
@@ -15,9 +16,7 @@ class FacilitiesModel(Base):
     title: Mapped[str] = mapped_column(String(100), unique=True)
 
     rooms: Mapped[list["RoomsModel"]] = relationship(
-        "RoomsModel",
-        secondary="rooms_facilities",
-        back_populates="facilities"
+        "RoomsModel", secondary="rooms_facilities", back_populates="facilities"
     )
 
 

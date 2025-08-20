@@ -8,11 +8,12 @@ class BookingRequest(BaseModel):
     date_from: date
     date_to: date
 
+
 class BookingAdd(BookingRequest):
     user_id: int
     price: int
 
+
 class Booking(BookingAdd):
     id: int
     created_at: datetime
-

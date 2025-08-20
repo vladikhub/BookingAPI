@@ -3,7 +3,7 @@ import json
 
 from unittest import mock
 
-mock.patch("fastapi_cache.decorator.cache", lambda *args, **kwargs : lambda f: f).start()
+mock.patch("fastapi_cache.decorator.cache", lambda *args, **kwargs: lambda f: f).start()
 
 import pytest
 from httpx import AsyncClient, ASGITransport
@@ -12,7 +12,7 @@ from src.api.dependencies import get_db
 from src.config import settings
 from src.database import engine_null_poll, Base, async_session_maker_null_pool
 from src.main import app
-from src.models import *   # noqa
+from src.models import *  # noqa
 from src.schemas.hotels import HotelAdd
 from src.schemas.rooms import RoomAdd
 from src.utils.db_manager import BDManager
@@ -22,16 +22,20 @@ from src.utils.db_manager import BDManager
 def check_test_mode():
     assert settings.MODE == "TEST"
 
+
 async def get_db_null_pool():
     async with BDManager(session_factory=async_session_maker_null_pool) as db:
         yield db
+
 
 @pytest.fixture(scope="function")
 async def db():
     async with BDManager(session_factory=async_session_maker_null_pool) as db:
         yield db
 
+
 app.dependency_overrides[get_db] = get_db_null_pool
+
 
 @pytest.fixture(scope="session", autouse=True)
 async def setup_database(check_test_mode):
@@ -39,13 +43,13 @@ async def setup_database(check_test_mode):
         await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
 
+
 @pytest.fixture(scope="session", autouse=True)
 async def load_data(setup_database):
-
-    with open("tests/mock_hotels.json", "r", encoding='utf-8') as file:
+    with open("tests/mock_hotels.json", "r", encoding="utf-8") as file:
         hotels = json.load(file)
 
-    with open("tests/mock_rooms.json", "r", encoding='utf-8') as file:
+    with open("tests/mock_rooms.json", "r", encoding="utf-8") as file:
         rooms = json.load(file)
 
     async with BDManager(session_factory=async_session_maker_null_pool) as db_:
@@ -53,14 +57,17 @@ async def load_data(setup_database):
         await db_.rooms.add_bulk([RoomAdd(**el) for el in rooms])
         await db_.commit()
 
+
 async def get_ac():
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         yield ac
+
 
 @pytest.fixture(scope="session")
 async def ac():
     async for ac_ in get_ac():
         yield ac_
+
 
 @pytest.fixture(scope="session", autouse=True)
 async def register_user(load_data, ac):
@@ -70,19 +77,16 @@ async def register_user(load_data, ac):
             "first_name": "Vlad",
             "last_name": "Smolkov",
             "email": "smavl.andrey@gmail.com",
-            "password": "1234"
-        }
+            "password": "1234",
+        },
     )
+
 
 @pytest.fixture(scope="session", autouse=True)
 async def authed_ac(register_user):
     async for ac in get_ac():
         response = await ac.post(
-            "/auth/login",
-            json={
-                "email": "smavl.andrey@gmail.com",
-                "password": "1234"
-            }
+            "/auth/login", json={"email": "smavl.andrey@gmail.com", "password": "1234"}
         )
         assert response.cookies.get("access_token")
         yield ac

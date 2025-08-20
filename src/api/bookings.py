@@ -1,5 +1,3 @@
-
-
 from fastapi import APIRouter, HTTPException
 
 from src.api.dependencies import DBDep, UserIdDep
@@ -8,25 +6,21 @@ from src.schemas.bookings import BookingRequest, BookingAdd
 
 router = APIRouter(prefix="/bookings", tags=["Бронирования"])
 
+
 @router.get("", summary="Получить все бронирования")
 async def get_bookings(db: DBDep):
     bookings = await db.bookings.get_all()
     return {"status": "OK", "data": bookings}
 
+
 @router.get("/me", summary="Получить бронирования пользователя")
-async def get_bookings_by_user(
-        user_id: UserIdDep,
-        db: DBDep
-):
+async def get_bookings_by_user(user_id: UserIdDep, db: DBDep):
     bookings = await db.bookings.get_filtered(user_id=user_id)
     return {"status": "OK", "data": bookings}
 
+
 @router.post("", summary="Добавить бронирование")
-async def create_booking(
-        data: BookingRequest,
-        db: DBDep,
-        user_id: UserIdDep
-):
+async def create_booking(data: BookingRequest, db: DBDep, user_id: UserIdDep):
     try:
         room = await db.rooms.get_one_or_none(id=data.room_id)
         hotel_id = room.hotel_id
@@ -40,4 +34,3 @@ async def create_booking(
         return {"status": "OK", "data": booking}
     except NoLeftRoomException:
         raise HTTPException(status_code=500, detail="no free rooms")
-

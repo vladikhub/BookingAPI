@@ -15,7 +15,6 @@ def test_task():
     print("Задача выполнена")
 
 
-
 def resize_image(input_path: str) -> None:
     output_folder = "src/static/images/"
     target_sizes = [100000, 500, 200]
@@ -28,7 +27,7 @@ def resize_image(input_path: str) -> None:
 
         for size in target_sizes:
             # Вычисляем пропорциональную ширину
-            width_percent = (size / float(img.size[0]))
+            width_percent = size / float(img.size[0])
             new_height = int((float(img.size[1]) * float(width_percent)))
 
             # Изменяем размер

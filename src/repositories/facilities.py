@@ -16,19 +16,15 @@ class RoomsFacilitiesRepository(BaseRepository):
     mapper = RoomFacilityDataMapper
 
     async def set_room_facilities(self, room_id: int, facilities_ids: list[int]):
-        cur_facilities_ids_query = (
-            select(self.model.facility_id)
-            .filter_by(room_id=room_id)
-        )
+        cur_facilities_ids_query = select(self.model.facility_id).filter_by(room_id=room_id)
         res = await self.session.execute(cur_facilities_ids_query)
         cur_facilities_ids = res.scalars().all()
         ids_for_del = list(set(cur_facilities_ids) - set(facilities_ids))
         ids_for_add = list(set(facilities_ids) - set(cur_facilities_ids))
 
         if ids_for_add:
-            add_stmt = (
-                insert(self.model)
-                .values([{"room_id": room_id, "facility_id": f_id} for f_id in ids_for_add])
+            add_stmt = insert(self.model).values(
+                [{"room_id": room_id, "facility_id": f_id} for f_id in ids_for_add]
             )
             await self.session.execute(add_stmt)
 
@@ -50,6 +46,5 @@ class RoomsFacilitiesRepository(BaseRepository):
             delete(self.model)
             .filter_by(room_id=room_id)
             .filter(self.model.facility_id.in_(list_idx))
-            )
+        )
         await self.session.execute(delete_stmt)
-

@@ -1,5 +1,6 @@
 import redis.asyncio as redis
 
+
 class RedisManager:
     def __init__(self, host: str, port: int):
         self.host = host
@@ -22,8 +23,5 @@ class RedisManager:
     async def get(self, key: str):
         return await self.redis.get(key)
 
-
     async def delete(self, key: str):
         await self.redis.delete(key)
-
-

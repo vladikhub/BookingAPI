@@ -6,19 +6,17 @@ from src.schemas.bookings import BookingAdd
 async def test_booking_crud(db):
     # Тест create
     booking_data = BookingAdd(
-        user_id= (await db.users.get_all())[0].id,
-        room_id= (await db.rooms.get_all())[0].id,
-        date_from= date(year=2025, month=6, day=30),
-        date_to= date(year=2025, month=6, day=21),
-        price= 200
+        user_id=(await db.users.get_all())[0].id,
+        room_id=(await db.rooms.get_all())[0].id,
+        date_from=date(year=2025, month=6, day=30),
+        date_to=date(year=2025, month=6, day=21),
+        price=200,
     )
     new_booking = await db.bookings.add(booking_data)
 
     booking_id = new_booking.id
     # Тест read
-    booking = await db.bookings.get_one_or_none(
-        id=new_booking.id
-    )
+    booking = await db.bookings.get_one_or_none(id=new_booking.id)
     assert booking
     assert new_booking.room_id == booking.room_id
     assert new_booking.price == booking.price
@@ -29,7 +27,7 @@ async def test_booking_crud(db):
         room_id=(await db.rooms.get_all())[0].id,
         date_from=date(year=2025, month=6, day=25),
         date_to=date(year=2025, month=6, day=21),
-        price=500
+        price=500,
     )
     old_price = new_booking.price
     old_date = new_booking.date_from
@@ -46,4 +44,3 @@ async def test_booking_crud(db):
 
     deleted_booking = await db.bookings.get_one_or_none(id=booking_id)
     assert deleted_booking is None
-

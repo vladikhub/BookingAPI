@@ -1,4 +1,3 @@
-
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
@@ -13,6 +12,6 @@ async_session_maker_null_pool = async_sessionmaker(bind=engine_null_poll, expire
 
 session = async_session_maker()
 
+
 class Base(DeclarativeBase):
     pass
-

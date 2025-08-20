@@ -1,16 +1,14 @@
 from datetime import date
 
 from fastapi import HTTPException
-from pydantic import BaseModel
 from sqlalchemy import select, insert
 from sqlalchemy.exc import IntegrityError
 
 from src.exceptions import NoLeftRoomException
-from src.models import HotelsModel, RoomsModel
 from src.models.bookings import BookingsModel
 from src.repositories.base import BaseRepository
 from src.repositories.utils import rooms_ids_for_booking
-from src.schemas.bookings import Booking, BookingAdd
+from src.schemas.bookings import BookingAdd
 from src.repositories.mappers.mappers import BookingDataMapper
 
 

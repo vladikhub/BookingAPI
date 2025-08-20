@@ -1,11 +1,8 @@
-from os import access
 
-from fastapi import Query, APIRouter, Body, HTTPException, Depends
-from fastapi import Response, Request
+from fastapi import APIRouter, HTTPException
+from fastapi import Response
 
 from src.api.dependencies import UserIdDep, DBDep
-from src.repositories.users import UsersRepository
-from src.database import async_session_maker
 from src.schemas.users import UserRequestRegister, UserLogin, UserRegister
 from src.services.auth import AuthService
 
@@ -16,17 +13,19 @@ async def register_user(
         data: UserRequestRegister,
         db: DBDep
 ):
+    try:
+        hashed_password = AuthService().hash_password(data.password)
+        new_user = UserRegister(
+            email=data.email,
+            hashed_password=hashed_password,
+            first_name=data.first_name,
+            last_name=data.last_name
+        )
 
-    hashed_password = AuthService().hash_password(data.password)
-    new_user = UserRegister(
-        email=data.email,
-        hashed_password=hashed_password,
-        first_name=data.first_name,
-        last_name=data.last_name
-    )
-
-    await db.users.add(new_user)
-    await db.commit()
+        await db.users.add(new_user)
+        await db.commit()
+    except: # noqa
+        raise HTTPException(status_code=400)
     return {"Success": "True"}
 
 @router.post("/login", summary="Аутентификация пользователя")

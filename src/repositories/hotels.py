@@ -8,7 +8,6 @@ from src.repositories.base import BaseRepository
 from src.repositories.mappers.base import DataMapper
 from src.repositories.mappers.mappers import HotelDataMapper
 from src.repositories.utils import rooms_ids_for_booking
-from src.schemas.hotels import Hotel
 
 class HotelsRepository(BaseRepository):
     model = HotelsModel

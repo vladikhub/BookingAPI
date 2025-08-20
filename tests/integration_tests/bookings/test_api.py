@@ -1,7 +1,5 @@
 import pytest
 
-from src.database import async_session_maker_null_pool
-from src.utils.db_manager import BDManager
 from tests.conftest import get_db_null_pool
 
 

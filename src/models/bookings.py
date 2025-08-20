@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from sqlalchemy import ForeignKey, Integer, DateTime, func
+from sqlalchemy import ForeignKey, DateTime, func
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column
 

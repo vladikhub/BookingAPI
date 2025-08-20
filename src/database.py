@@ -1,11 +1,9 @@
-import asyncio
 
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
 from src.config import settings
-from sqlalchemy import text, NullPool
-import asyncio
+from sqlalchemy import NullPool
 
 engine = create_async_engine(settings.DB_URL)
 engine_null_poll = create_async_engine(settings.DB_URL, poolclass=NullPool)

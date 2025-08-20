@@ -1,17 +1,13 @@
 from datetime import date
 
-from fastapi import HTTPException
-from sqlalchemy import select, insert, delete, func
+from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-from src.database import engine
-from src.models.bookings import BookingsModel
 from src.models.rooms import RoomsModel
-from src.models.hotels import HotelsModel
 from src.repositories.base import BaseRepository
 from src.repositories.mappers.mappers import RoomDataMapper
 from src.repositories.utils import rooms_ids_for_booking
-from src.schemas.rooms import Room, RoomAdd, RoomWithRel
+from src.schemas.rooms import RoomWithRel
 
 
 class RoomsRepository(BaseRepository):

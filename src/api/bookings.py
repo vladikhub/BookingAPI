@@ -38,6 +38,6 @@ async def create_booking(
         booking = await db.bookings.add_booking(_booking_data, hotel_id=hotel_id)
         await db.commit()
         return {"status": "OK", "data": booking}
-    except NoLeftRoomException as er:
+    except NoLeftRoomException:
         raise HTTPException(status_code=500, detail="no free rooms")
 

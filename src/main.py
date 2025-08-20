@@ -1,4 +1,3 @@
-import json
 from contextlib import  asynccontextmanager
 
 import uvicorn
@@ -9,7 +8,6 @@ from pathlib import Path
 
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
-from fastapi_cache.decorator import cache
 
 sys.path.append(str(Path(__file__).parent.parent))
 

@@ -1,12 +1,15 @@
 import pytest
 
-@pytest.mark.parametrize("email, password, first_name, last_name, register_code, login_code, status_code, logout_status_code", [
+@pytest.mark.parametrize("email, password, first_name, last_name, register_code, "
+                         "login_code, status_code, logout_status_code", [
     ("user@example.com", "1234", "Ivan", "Pupkov", 200, 200, 200, 401),
-    ("user@example.com", "1234", "Ivan", "Pupkov", 404, 200, 200, 401),
-    ("user@example.com", "5678", "Ivan", "Pupkov", 404, 401, 401, 401),
+    ("user@example.com", "1234", "Ivan", "Pupkov", 400, 200, 200, 401),
+    ("user@example.com", "5678", "Ivan", "Pupkov", 400, 401, 401, 401),
+    ("abcd", "555", "Ivan", "Pupkov", 422, 422, 401, 401),
 ])
 async def test_auth_user_flow(
-        email, password, first_name, last_name, status_code, login_code, register_code, logout_status_code,
+        email: str, password: str, first_name: str, last_name: str,
+        register_code: int, login_code: int, status_code: int, logout_status_code: int,
         ac
 ):
     # Регистрация
@@ -34,6 +37,7 @@ async def test_auth_user_flow(
         res = response.json()
         assert isinstance(res, dict)
         assert "access_token" in res
+        assert "access_token" in ac.cookies
 
     # Проверка пользователя
     response = await ac.get("auth/me")
@@ -49,6 +53,8 @@ async def test_auth_user_flow(
     # Выход пользователя
     response = await ac.post("/auth/logout")
     assert response.status_code == 200
+    assert "access_token" not in response.json()
+    assert "access_token" not in ac.cookies
 
     # Проверка пользователя
     response = await ac.get("auth/me")

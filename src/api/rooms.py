@@ -5,8 +5,6 @@ from fastapi import APIRouter, Body, Query
 from fastapi_cache.decorator import cache
 
 from src.api.dependencies import DBDep
-from src.database import async_session_maker
-from src.repositories.rooms import RoomsRepository
 from src.schemas.facilities import RoomFacilityAdd
 from src.schemas.rooms import RoomAdd, RoomPatch, RoomAddRequest, RoomPatchRequest
 

@@ -29,14 +29,15 @@ async def create_booking(
 ):
     try:
         room = await db.rooms.get_one_or_none(id=data.room_id)
+        hotel_id = room.hotel_id
         if room is None:
             raise HTTPException(status_code=404, detail="object is not exist")
         price = room.price
         _booking_data = BookingAdd(**data.model_dump(), user_id=user_id, price=price)
 
-        booking = await db.bookings.add_booking(**_booking_data.model_dump())
+        booking = await db.bookings.add_booking(_booking_data, hotel_id=hotel_id)
         await db.commit()
         return {"status": "OK", "data": booking}
     except NoLeftRoomException as er:
-        raise HTTPException(status_code=400, detail="no free rooms")
+        raise HTTPException(status_code=500, detail="no free rooms")
 

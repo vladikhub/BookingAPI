@@ -40,7 +40,7 @@ async def setup_database(check_test_mode):
         await conn.run_sync(Base.metadata.create_all)
 
 @pytest.fixture(scope="session", autouse=True)
-async def load_data(setup_database, db):
+async def load_data(setup_database):
 
     with open("tests/mock_hotels.json", "r", encoding='utf-8') as file:
         hotels = json.load(file)

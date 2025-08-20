@@ -64,8 +64,6 @@ class BaseRepository:
         objects = res.scalars().all()
         if not objects:
             raise HTTPException(status_code=404, detail="object is not found")
-        if len(objects) > 1:
-            raise HTTPException(status_code=400, detail="must be one object")
         delete_data_stmt = delete(self.model).filter_by(**filter_by)
         # print(update_data_stmt.compile(compile_kwargs={"literal_binds": True}))
         await self.session.execute(delete_data_stmt)

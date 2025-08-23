@@ -10,19 +10,20 @@ router = APIRouter(prefix="/auth", tags=["Авторизация и аутент
 
 @router.post("/register", summary="Регистрация пользователя")
 async def register_user(data: UserRequestRegister, db: DBDep):
-    try:
-        hashed_password = AuthService().hash_password(data.password)
-        new_user = UserRegister(
-            email=data.email,
-            hashed_password=hashed_password,
-            first_name=data.first_name,
-            last_name=data.last_name,
-        )
 
-        await db.users.add(new_user)
-        await db.commit()
-    except:  # noqa
-        raise HTTPException(status_code=400)
+    exist_user = db.users.get_one_or_none(email=data.email)
+    if exist_user:
+        raise HTTPException(status_code=409, detail="Пользователь с таким email уже существует")
+    hashed_password = AuthService().hash_password(data.password)
+    new_user = UserRegister(
+        email=data.email,
+        hashed_password=hashed_password,
+        first_name=data.first_name,
+        last_name=data.last_name,
+    )
+
+    await db.users.add(new_user)
+    await db.commit()
     return {"Success": "True"}
 
 

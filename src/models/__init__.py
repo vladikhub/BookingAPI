@@ -7,10 +7,10 @@ from src.models.facilities import RoomsFacilitiesModel
 
 
 __all__ = [
-    HotelsModel,
-    RoomsModel,
-    UsersModel,
-    BookingsModel,
-    FacilitiesModel,
-    RoomsFacilitiesModel,
+    "HotelsModel",
+    "RoomsModel",
+    "UsersModel",
+    "BookingsModel",
+    "FacilitiesModel",
+    "RoomsFacilitiesModel",
 ]

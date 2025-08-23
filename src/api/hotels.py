@@ -1,6 +1,6 @@
 from datetime import date
 
-from fastapi import Query, APIRouter, Body
+from fastapi import Query, APIRouter, Body, HTTPException
 from fastapi_cache.decorator import cache
 
 from src.api.dependencies import PaginationDep, DBDep
@@ -19,7 +19,9 @@ async def get_hotels(
     date_from: date = Query(example="2025-03-01"),
     date_to: date = Query(example="2025-03-10"),
 ):
-    print("Идем в бд")
+
+    if date_to < date_from:
+        raise HTTPException(status_code=400, detail="Дата выезда должна быть позже даты въезда")
     per_page = pagination.per_page or 3
     return await db.hotels.get_filtered_by_date(
         date_from,
@@ -34,6 +36,8 @@ async def get_hotels(
 @router.get("/{hotel_id}", summary="Получить отель по id")
 async def get_hotel(hotel_id: int, db: DBDep):
     hotel = db.hotels.get_one_or_none(id=hotel_id)
+    if hotel is None:
+        raise HTTPException(status_code=404, detail="Отель не найден")
     return {"hotel": hotel}
 
 

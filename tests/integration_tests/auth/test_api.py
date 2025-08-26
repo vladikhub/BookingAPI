@@ -6,8 +6,8 @@ import pytest
     "login_code, status_code, logout_status_code",
     [
         ("user@example.com", "1234", "Ivan", "Pupkov", 200, 200, 200, 401),
-        ("user@example.com", "1234", "Ivan", "Pupkov", 400, 200, 200, 401),
-        ("user@example.com", "5678", "Ivan", "Pupkov", 400, 401, 401, 401),
+        ("user@example.com", "1234", "Ivan", "Pupkov", 409, 200, 200, 401),
+        ("user@example.com", "5678", "Ivan", "Pupkov", 409, 401, 401, 401),
         ("abcd", "555", "Ivan", "Pupkov", 422, 422, 401, 401),
     ],
 )

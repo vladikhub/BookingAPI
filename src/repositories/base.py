@@ -2,8 +2,11 @@ from fastapi import HTTPException
 from pydantic import BaseModel
 from sqlalchemy import select, insert, update, delete
 from sqlalchemy.exc import IntegrityError, NoResultFound
+from asyncpg.exceptions import UniqueViolationError
 
-from src.exceptions import ObjectNotFoundException
+import logging
+
+from src.exceptions import ObjectNotFoundException, ObjectAlreadyExistsException
 from src.repositories.mappers.base import DataMapper
 
 
@@ -40,12 +43,21 @@ class BaseRepository:
         return self.mapper.map_to_domain_entity(model)
 
     async def add(self, data: BaseModel, *args):
+        add_data_stmt = insert(self.model).values(**data.model_dump()).returning(self.model)
+        # print(add_hotel_stmt.compile(compile_kwargs={"literal_binds": True}))
         try:
-            add_data_stmt = insert(self.model).values(**data.model_dump()).returning(self.model)
-            # print(add_hotel_stmt.compile(compile_kwargs={"literal_binds": True}))
             res = await self.session.execute(add_data_stmt)
-        except IntegrityError:
-            raise HTTPException(status_code=404, detail="object is not found")
+        except IntegrityError as ex:
+            logging.error(
+                f"Не удалось добавить данные в БД, входные данные={data}, тип ошибки:{type(ex.orig.__cause__)}"
+            )
+            if isinstance(ex.orig.__cause__, UniqueViolationError):
+                raise ObjectAlreadyExistsException from ex
+            else:
+                logging.error(
+                    f"Незнакомая ошибка, тип ошибки:{type(ex.orig.__cause__)}"
+                )
+                raise ex
         model = res.scalars().one()
         return self.mapper.map_to_domain_entity(model)
 

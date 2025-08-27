@@ -3,6 +3,7 @@ from src.services.base import BaseService
 
 from src.tasks.tasks import test_task
 
+
 class FacilityService(BaseService):
     async def get_all(self):
         return await self.db.facilities.get_all()

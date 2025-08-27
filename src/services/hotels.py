@@ -1,7 +1,11 @@
 from datetime import date
 
 from src.api.dependencies import PaginationDep
-from src.exceptions import check_date_to_after_date_from, ObjectNotFoundException, HotelNotFoundException
+from src.exceptions import (
+    check_date_to_after_date_from,
+    ObjectNotFoundException,
+    HotelNotFoundException,
+)
 from src.schemas.hotels import HotelAdd, HotelPATCH
 from src.services.base import BaseService
 
@@ -13,7 +17,7 @@ class HotelService(BaseService):
         title: str | None,
         location: str | None,
         date_from: date,
-        date_to: date
+        date_to: date,
     ):
         check_date_to_after_date_from(date_from, date_to)
         per_page = pagination.per_page or 3

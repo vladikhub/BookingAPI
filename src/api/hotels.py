@@ -4,7 +4,11 @@ from fastapi import Query, APIRouter, Body, HTTPException
 from fastapi_cache.decorator import cache
 
 from src.api.dependencies import PaginationDep, DBDep
-from src.exceptions import check_date_to_after_date_from, ObjectNotFoundException, HotelNotExistsHTTPException
+from src.exceptions import (
+    check_date_to_after_date_from,
+    ObjectNotFoundException,
+    HotelNotExistsHTTPException,
+)
 from src.schemas.hotels import HotelPATCH, HotelAdd
 from src.services.hotels import HotelService
 
@@ -21,13 +25,8 @@ async def get_hotels(
     date_from: date = Query(example="2025-03-01"),
     date_to: date = Query(example="2025-03-10"),
 ):
-
     return await HotelService(db).get_filtered_by_date(
-        pagination,
-        title,
-        location,
-        date_from,
-        date_to
+        pagination, title, location, date_from, date_to
     )
 
 

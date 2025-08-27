@@ -27,4 +27,3 @@ async def create_booking(data: BookingRequest, db: DBDep, user_id: UserIdDep):
     except NoLeftRoomException:
         raise NoLeftRoomHTTPException
     return {"status": "OK", "data": booking}
-

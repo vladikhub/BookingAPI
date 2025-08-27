@@ -34,4 +34,3 @@ class BookingsRepository(BaseRepository):
             model = res.scalars().one()
             return self.mapper.map_to_domain_entity(model)
         raise NoLeftRoomException
-

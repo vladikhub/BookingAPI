@@ -54,9 +54,7 @@ class BaseRepository:
             if isinstance(ex.orig.__cause__, UniqueViolationError):
                 raise ObjectAlreadyExistsException from ex
             else:
-                logging.error(
-                    f"Незнакомая ошибка, тип ошибки:{type(ex.orig.__cause__)}"
-                )
+                logging.error(f"Незнакомая ошибка, тип ошибки:{type(ex.orig.__cause__)}")
                 raise ex
         model = res.scalars().one()
         return self.mapper.map_to_domain_entity(model)

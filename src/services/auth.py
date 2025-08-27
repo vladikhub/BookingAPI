@@ -5,8 +5,11 @@ from passlib.context import CryptContext
 import jwt
 
 from src.config import settings
-from src.exceptions import ObjectAlreadyExistsException, UserAlreadyExistsException, \
-    IncorrectPasswordException
+from src.exceptions import (
+    ObjectAlreadyExistsException,
+    UserAlreadyExistsException,
+    IncorrectPasswordException,
+)
 from src.schemas.users import UserRegister, UserRequestRegister, UserLogin
 from src.services.base import BaseService
 
@@ -61,4 +64,3 @@ class AuthService(BaseService):
 
     async def get_one_or_none(self, user_id: int):
         return await self.db.users.get_one_or_none(id=user_id)
-

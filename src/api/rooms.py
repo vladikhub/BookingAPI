@@ -5,8 +5,12 @@ from fastapi import APIRouter, Body, Query
 from fastapi_cache.decorator import cache
 
 from src.api.dependencies import DBDep
-from src.exceptions import RoomNotExistsHTTPException, \
-    HotelNotExistsHTTPException, HotelNotFoundException, RoomNotFoundException
+from src.exceptions import (
+    RoomNotExistsHTTPException,
+    HotelNotExistsHTTPException,
+    HotelNotFoundException,
+    RoomNotFoundException,
+)
 from src.schemas.rooms import RoomAddRequest, RoomPatchRequest
 from src.services.rooms import RoomService
 
@@ -26,6 +30,7 @@ async def get_rooms(
     except HotelNotFoundException:
         raise HotelNotExistsHTTPException
     return rooms
+
 
 @router.get(
     "/{hotel_id}/rooms/{room_id}",
@@ -74,7 +79,6 @@ async def add_rooms(
     except HotelNotFoundException:
         raise HotelNotExistsHTTPException
     return room
-
 
 
 @router.delete("/{hotel_id}/rooms/{room_id}", summary="Удаление номера")
